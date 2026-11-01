@@ -1,0 +1,8 @@
+code_file: ../results/rm.32.16.pcm1.mat
+decoder: { algorithm: NMS, schedule: flooding, max_iter: 6, norm_factor: 0.7 }
+all_zero: false
+ebn0_min: 0.0
+ebn0_max: 8.0
+ebn0_step: 0.5
+min_cw: 200000
+min_cw_err: 200
