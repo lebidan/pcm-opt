@@ -12,14 +12,32 @@ remarkably well:
 > *IEEE Journal on Selected Areas in Communications*, vol. 43, no. 4, pp. 1135–1149, April 2025.
 > [IEEE Xplore](https://ieeexplore.ieee.org/document/10887536)
 
+I like this approach because it can turn a dense PCM into a sparser one suited to BP decoding.
+As with short LDPC codes, the main challenge then becomes bringing BP closer to maximum-likelihood
+decoding (MLD) with as little computational overhead as possible.
+
 Unfortunately, and to the best of my knowledge, neither the optimized PCMs of the paper nor the code
 to construct them have been made publicly available. This repository is my attempt to fill this
 gap. It is a Julia implementation of the method, which builds sparse PCMs of girth 6, often redundant,
 possibly with auxiliary (punctured) variable nodes, together with a BP simulator to measure the
 resulting frame error rates. Its main purpose is to reproduce the results of the paper.
 
-This is my own implementation of the paper, written with the help of Claude Code. It is not the
+This is my own implementation of the paper, written with the help of Opus 5.5 and GPT-6.1-Sol. It is not the
 authors' code, so any error or misinterpretation of the algorithms is mine.
+
+**Current status (November 2026):** most results are reproduced, though the constructed PCMs do not
+always have the exact form reported in the paper. The best PCMs provided here generally give FER
+close to or better than the published curves, with a remaining gap for the (128,72) polar code
+(see below).
+
+**Lessons learned:** I found that choosing the parity checks in the starting PCM deserves as much
+attention as optimizing the resulting graph through the PCM-I or PCM-II construction. As demonstrated
+with the (128,64) Reed–Muller code, a structured redundant PCM can sometimes make the simpler PCM-I
+construction sufficient. Graph metrics are useful guides when searching large design spaces, but
+they are only approximate proxies for FER. In the polar experiments, the final ACE-based selection
+rule preferred matrices that decoded worse than some matrices obtained earlier in the construction.
+This suggests that the criterion alone may be insufficient to select the best decoding graph,
+even though it remains useful for guiding the search.
 
 ## Installation
 
@@ -59,6 +77,10 @@ of the candidate rows in Algorithm 3, the seed search of `pcm_i.jl` (`n_seed=M`)
 simulations. Julia uses a single thread by default. Use `julia -t X` to run calculations on X
 threads, and `julia -t auto` to use one thread per logical core of the machine. For the codes of
 this repository, the extracted PCMs do not depend on the number of threads.
+
+The three original CRC24C polar codes can be regenerated with
+`julia --project src/build_polar_codes.jl`. Add `payload=20`, `payload=40` or `payload=72`
+to generate only one of them.
 
 **PCM-I (Algorithm 1 on the code's PCM):**
 
@@ -236,7 +258,7 @@ It gains about 0.1 dB over the paper's PCM, for 24% more edges (NMS, 20 iteratio
 The row count at which η̄_min stops increasing depends on `seed_p`, so other seeds with a large `M_a`
 may do better.
 
-### RM(128,64): not reproduced
+### RM(128,64)
 
 The search space matches the paper (94 488 codewords of weight 16), but I could not obtain the
 141×141 PCM-II with 13 auxiliary VNs of the paper. The best PCM-II I found is 147×161 with 1078
@@ -248,9 +270,10 @@ julia --project -t auto scripts/pcm_ii.jl codes/rm.128.64 M_a=150 seed_p=6
 (cd sim && julia --project=. -t auto scripts/simulate.jl config/rm.128.64.pcm2.yaml)
 ```
 
-Codex found a PCM with better FER by building a redundant base matrix with many overlapping checks
-by design. The new base, `codes/rm.128.64.geom.mat`, has 135 weight-16 checks. Algorithm 1 gives a
-144×137 PCM with 9 auxiliary VNs, 1296 edges and η̄_min = 28:
+However, GPT-6.1-Sol found an optimized PCM with *fewer* auxiliary VNs and *better FER* than the one reported in the paper by
+starting from a different, redundant PCM constructed using finite geometry to have many overlapping checks.
+The new base PCM, `codes/rm.128.64.geom.mat`, has 135 weight-16 checks.
+Passing it to Algorithm 1 gives a 144×137 PCM with 9 auxiliary VNs, 1296 edges and η̄_min = 28:
 
 ```
 julia --project scripts/pcm_i.jl codes/rm.128.64.geom
@@ -258,7 +281,8 @@ julia --project scripts/pcm_i.jl codes/rm.128.64.geom
 
 See the [construction details and recipe](docs/rm_128_64.md).
 
-Both candidates have FER close to the paper's (NMS, 20 iterations):
+Both candidates have FER close to the paper's (NMS, 20 iterations), with the PCM-I obtained from the geometric base
+matrix slightly outperforming the paper's PCM-II:
 
 | PCM | FER at 3 dB | 4 dB |
 |---|---|---|
@@ -266,12 +290,53 @@ Both candidates have FER close to the paper's (NMS, 20 iterations):
 | 147×161 | 1.29e-1 | 1.03e-2 |
 | 144×137 (geometric) | 1.12e-1 | 7.65e-3 |
 
-If you have been able to reproduce the paper's PCM-II for this code, I would love to hear from you:
-please open an issue or contact me directly.
+### Polar codes: partially reproduced
 
-### Not covered yet
+The original PCMs for the three length-128 polar codes, using the 5G NR downlink (DCI)
+construction, can be regenerated with:
 
-I have not run the (128, 20), (128, 40) and (128, 72) polar codes of the paper yet.
+```
+julia --project src/build_polar_codes.jl
+```
+
+The files are saved as `codes/polar.128.<k>.crc24c.mat`. Add `payload=20`, `payload=40` or
+`payload=72` to generate only one code. Each code uses CRC24C, the NR input interleaver and a
+length-128 polar transform, before rate matching. The dimension counts payload bits only;
+the unfrozen positions also include the 24 CRC bits.
+
+The reliability and input-interleaving tables were taken from NVIDIA's
+[Sionna](https://github.com/nvlabs/sionna) library.
+
+| Payload | Unfrozen bits | Frozen checks + CRC checks | Original PCM | Edges |
+|---|---|---|---|---|
+| 20 | 44 | 84 + 24 | 108×128 | 2401 |
+| 40 | 64 | 64 + 24 | 88×128 | 2481 |
+| 72 | 96 | 32 + 24 | 56×128 | 2425 |
+
+The PCM dimensions and edge counts match those reported in Fig. 8 of the paper.
+
+The optimized PCMs are only partially reproduced. The candidates below were built using low-weight
+checks from Algorithm 2 and row growth from Algorithm 3, with Algorithm 1 removing 4-cycles.
+They are the optimized matrices obtained after selecting 236, 174 and 145 checks, respectively,
+into the redundant input PCM, rather than the final matrices returned by Algorithm 3's
+ACE-based selection rule.
+
+| Code | PCM-II | Size | Auxiliary VNs | Edges |
+|---|---|---|---|---|
+| (128,20) | Paper | 323×215 | 87 | 1224 |
+| (128,20) | Here | 323×215 | 87 | 1225 |
+| (128,40) | Paper | 329×283 | 155 | 1517 |
+| (128,40) | Here | 329×283 | 155 | 1538 |
+| (128,72) | Paper | 409×420 | 292 | 1972 |
+| (128,72) | Here | 482×465 | 337 | 2232 |
+
+Results: [20-bit candidate](results/polar.128.20.crc24c.pcm2.mat),
+[40-bit candidate](results/polar.128.40.crc24c.pcm2.mat) and
+[72-bit candidate](results/polar.128.72.crc24c.pcm2.mat).
+The first two have FER close to the paper's; the third still has about three times the paper's
+FER at 4 dB. These comparisons use an inferred energy normalization that includes CRC bits.
+The exact published PCMs have not been reproduced. See the [construction notes](docs/polar_codes.md)
+for the selected inputs, replay recipe, graph statistics and FER measurements.
 
 ## License
 

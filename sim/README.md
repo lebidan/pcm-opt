@@ -65,7 +65,8 @@ A point stops when both `min_cw` and `min_cw_err` are reached. The stopping rule
 each round of `batch_size` frames on every thread, so the number of frames of a point is a multiple
 of `batch_size` × number of threads, possibly well above `min_cw`. Each thread draws its own noise, so a simulation is reproducible for a given `seed`,
 `batch_size` and number of threads. With another number of threads, the error rates differ within
-the usual Monte-Carlo accuracy.
+the usual Monte-Carlo accuracy. The decoder enforces LLR saturation because messages can overflow in
+`Float32` arithmetic, even with normalized min-sum, when using many iterations with high-degree variable nodes.
 
 ### Decoders
 
