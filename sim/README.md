@@ -59,6 +59,7 @@ settings of the paper. See the [top-level README](../README.md) for the results.
 | `decoder.schedule` | `layered` | `flooding` or `layered` |
 | `decoder.max_iter` | `32` | Maximum number of iterations |
 | `decoder.norm_factor` | `0.7` | Normalization factor α of NMS |
+| `decoder.llr_clip` | `128` | LLR saturation limit |
 
 A point stops when both `min_cw` and `min_cw_err` are reached. The stopping rule is checked after
 each round of `batch_size` frames on every thread, so the number of frames of a point is a multiple

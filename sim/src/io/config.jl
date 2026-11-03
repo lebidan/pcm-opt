@@ -49,7 +49,7 @@ const ALGORITHM_NAMES = Dict("SPA"=>SPAExact, "FASTSPA"=>FastSPA, "MS"=>MinSum, 
 
 parse_algorithm(s) = parse_enum(ALGORITHM_NAMES, s, "algorithm")
 
-const DECODER_KEYS = Set(["algorithm", "schedule", "max_iter", "norm_factor"])
+const DECODER_KEYS = Set(["algorithm", "schedule", "max_iter", "norm_factor", "llr_clip"])
 function parse_decoder(d)
     check_keys(d, DECODER_KEYS, "decoder")
     max_iter = Int(get(d, "max_iter", 32))
@@ -61,6 +61,7 @@ function parse_decoder(d)
         max_iter,
         parse_algorithm(get(d, "algorithm", "FastSPA")),
         LLRFloat(norm_factor),
+        LLRFloat(get(d, "llr_clip", 128)),
     )
 end
 

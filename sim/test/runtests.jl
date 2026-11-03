@@ -220,6 +220,56 @@ end
         @test differed
     end
 
+    @testset "LLR saturation" begin
+        @test BPConfig(Flooding, 5, MinSum).llr_clip == 128f0
+        @test BPConfig(Flooding, 5, NormMinSum, 0.8).llr_clip == 128f0
+        @test parse_decoder(Dict()).llr_clip == 128f0
+        @test parse_decoder(Dict("llr_clip" => 16)).llr_clip == 16f0
+        @test Dict(BPsim.decoder_spec(parse_decoder(Dict("llr_clip" => 16))))["llr_clip"] == 16f0
+        for value in (0, -1, Inf, -Inf, NaN, 1e100, 1e-100)
+            @test_throws Exception parse_decoder(Dict("llr_clip" => value))
+            @test_throws Exception parse_decoder(Dict("norm_factor" => value))
+        end
+
+        # Below saturation, retain the exact single-check extrinsic updates.
+        graph = TannerGraph(Bool[1 1 1])
+        for schedule in (Flooding, Layered)
+            dec = BPDecoder(graph, BPConfig(schedule, 1, MinSum))
+            bits = zeros(Bool, 3)
+            @test decode!(dec, LLRFloat[-2, 3, 4], bits) == (Codeword, 1)
+            @test bits == [false, false, false]
+            @test dec.llr_out == LLRFloat[1, 1, 2]
+            for value in (NaN, Inf, -Inf)
+                @test_throws ArgumentError decode!(dec, LLRFloat[value, 1, 1], bits)
+            end
+        end
+
+        # Unbounded NMS overflows on this graph and falsely accepts all zeros.
+        graph = TannerGraph(trues(4, 4))
+        for schedule in (Flooding, Layered), rule in (SPAExact, FastSPA, MinSum, NormMinSum), clip in (16f0, 128f0)
+            dec = BPDecoder(graph, BPConfig(schedule, 200, rule, 0.7, clip))
+            bits = zeros(Bool, 4)
+            result, iterations = decode!(dec, LLRFloat[-1, 1, 1, 1], bits)
+            @test all(isfinite, dec.llr_out)
+            for buffer in (dec.msg_v2c, dec.msg_c2v, dec.α, dec.β)
+                @test all(isfinite, buffer) && maximum(abs, buffer) <= clip
+            end
+            if schedule == Flooding && rule == NormMinSum
+                @test (result, iterations) == (BPsim.Failure, 200)
+                @test bits == [true, false, false, false]
+            end
+        end
+        dec = BPDecoder(graph, BPConfig(Flooding, 200, NormMinSum, 0.7, floatmax(LLRFloat)))
+        @test_throws OverflowError decode!(dec, LLRFloat[-1, 1, 1, 1], zeros(Bool, 4))
+
+        mktempdir() do dir
+            path = repofile("codes/rm.32.16.mat")
+            cfg = load_config(nothing, Dict("code_file" => path, "decoder" => Dict("llr_clip" => 16)))
+            BPsim.write_sidecar(joinpath(dir, "run.yaml"), cfg, load_code(path), "test")
+            @test BPsim.YAML.load_file(joinpath(dir, "run.yaml"))["decoder"]["llr_clip"] == 16
+        end
+    end
+
     @testset "config validation" begin
         @test_throws ErrorException parse_decoder(Dict("max_iter" => 0))
         @test parse_decoder(Dict("max_iter" => 10)).max_iter == 10
