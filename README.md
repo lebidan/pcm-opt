@@ -248,12 +248,23 @@ julia --project -t auto scripts/pcm_ii.jl codes/rm.128.64 M_a=150 seed_p=6
 (cd sim && julia --project=. -t auto scripts/simulate.jl config/rm.128.64.pcm2.yaml)
 ```
 
-Its FER is nevertheless close to the paper's (NMS, 20 iterations):
+Codex found a PCM with better FER by building a redundant base matrix with many overlapping checks
+by design. The new base, `codes/rm.128.64.geom.mat`, has 135 weight-16 checks. Algorithm 1 gives a
+144×137 PCM with 9 auxiliary VNs, 1296 edges and η̄_min = 28:
 
-| PCM-II | FER at 3 dB | 4 dB |
+```
+julia --project scripts/pcm_i.jl codes/rm.128.64.geom
+```
+
+See the [construction details and recipe](docs/rm_128_64.md).
+
+Both candidates have FER close to the paper's (NMS, 20 iterations):
+
+| PCM | FER at 3 dB | 4 dB |
 |---|---|---|
 | 141×141 (paper, Fig. 9) | ≈ 1.2e-1 | ≈ 8e-3 |
 | 147×161 | 1.29e-1 | 1.03e-2 |
+| 144×137 (geometric) | 1.12e-1 | 7.65e-3 |
 
 If you have been able to reproduce the paper's PCM-II for this code, I would love to hear from you:
 please open an issue or contact me directly.
