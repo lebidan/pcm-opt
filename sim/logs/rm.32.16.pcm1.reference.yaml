@@ -1,0 +1,31 @@
+# BP optimized-PCM simulation — parameters and run metadata
+# results are reproducible at a fixed nthreads (deterministic per-thread seeding
+# + round-synchronized batching); the thread count affects the total frame count.
+code_file: ../results/rm.32.16.pcm1.mat
+code_name: RM
+n: 32
+k: 16
+n_avn: 12
+m: 28
+rate: 0.5
+dmin: 8
+use_base_pcm: false
+decoder:
+  algorithm: NMS
+  schedule: flooding
+  max_iter: 6
+  norm_factor: 0.7
+  llr_clip: 128.0
+all_zero: false
+llr_scaling: true
+ebn0_min: 0.0
+ebn0_max: 7.0
+ebn0_step: 0.5
+min_cw: 200000
+min_cw_err: 50
+seed: 8731
+batch_size: 250
+checkpoint_seconds: 5.0
+nthreads: 16
+julia_version: "1.12.6"
+started: 2026-11-03-18-14-05

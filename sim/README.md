@@ -37,8 +37,9 @@ julia --project=. -t auto scripts/simulate.jl config/rm.32.16.pcm2.yaml use_base
 julia --project=. -t auto scripts/simulate.jl code_file=../codes/bch.63.45.mat ebn0_max=6 decoder.algorithm=MS
 ```
 
-`sim/config/` contains one config for each PCM in `results/`, except RM(8,4). They use the decoder
-settings of the paper. See the [top-level README](../README.md) for the results.
+`sim/config/` contains one config for each optimized PCM in `results/`, except RM(8,4). They use the decoder
+settings of the paper. The [reference records](logs/README.md) include CSV results and run metadata;
+use the recorded thread count for exact replay. See the [top-level README](../README.md) for the results.
 
 ### Settings
 
@@ -59,12 +60,14 @@ settings of the paper. See the [top-level README](../README.md) for the results.
 | `decoder.schedule` | `layered` | `flooding` or `layered` |
 | `decoder.max_iter` | `32` | Maximum number of iterations |
 | `decoder.norm_factor` | `0.7` | Normalization factor α of NMS |
+| `decoder.llr_clip` | `128` | LLR saturation limit |
 
 A point stops when both `min_cw` and `min_cw_err` are reached. The stopping rule is checked after
 each round of `batch_size` frames on every thread, so the number of frames of a point is a multiple
 of `batch_size` × number of threads, possibly well above `min_cw`. Each thread draws its own noise, so a simulation is reproducible for a given `seed`,
 `batch_size` and number of threads. With another number of threads, the error rates differ within
-the usual Monte-Carlo accuracy.
+the usual Monte-Carlo accuracy. The decoder enforces LLR saturation because messages can overflow in
+`Float32` arithmetic, even with normalized min-sum, when using many iterations with high-degree variable nodes.
 
 ### Decoders
 

@@ -1,0 +1,31 @@
+# BP optimized-PCM simulation — parameters and run metadata
+# results are reproducible at a fixed nthreads (deterministic per-thread seeding
+# + round-synchronized batching); the thread count affects the total frame count.
+code_file: ../results/polar.128.72.crc24c.pcm2.mat
+code_name: 5G NR polar CRC24C
+n: 128
+k: 72
+n_avn: 337
+m: 482
+rate: 0.5625
+dmin: null
+use_base_pcm: false
+decoder:
+  algorithm: NMS
+  schedule: flooding
+  max_iter: 200
+  norm_factor: 0.7
+  llr_clip: 128.0
+all_zero: false
+llr_scaling: true
+ebn0_min: 2.249387366082999
+ebn0_max: 5.249387366082999
+ebn0_step: 0.5
+min_cw: 200000
+min_cw_err: 50
+seed: 984731
+batch_size: 250
+checkpoint_seconds: 5.0
+nthreads: 16
+julia_version: "1.12.6"
+started: 2026-11-03-18-27-02
