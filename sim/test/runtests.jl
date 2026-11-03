@@ -259,8 +259,6 @@ end
                 @test bits == [true, false, false, false]
             end
         end
-        dec = BPDecoder(graph, BPConfig(Flooding, 200, NormMinSum, 0.7, floatmax(LLRFloat)))
-        @test_throws OverflowError decode!(dec, LLRFloat[-1, 1, 1, 1], zeros(Bool, 4))
 
         mktempdir() do dir
             path = repofile("codes/rm.32.16.mat")

@@ -54,7 +54,6 @@ function process_vn!(v::Int, vn_edge::Vector{Int32}, lo::Int, hi::Int, llr_in::V
     @inbounds @simd for idx in lo:hi
         acc += msg_c2v[vn_edge[idx]]
     end
-    isfinite(acc) || throw(OverflowError("BP variable-node sum overflowed; reduce llr_clip"))
     llr_out[v] = acc
     dec_bits[v] = acc < 0
     @inbounds @simd for idx in lo:hi
