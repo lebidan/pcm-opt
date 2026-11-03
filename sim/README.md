@@ -37,8 +37,9 @@ julia --project=. -t auto scripts/simulate.jl config/rm.32.16.pcm2.yaml use_base
 julia --project=. -t auto scripts/simulate.jl code_file=../codes/bch.63.45.mat ebn0_max=6 decoder.algorithm=MS
 ```
 
-`sim/config/` contains one config for each PCM in `results/`, except RM(8,4). They use the decoder
-settings of the paper. See the [top-level README](../README.md) for the results.
+`sim/config/` contains one config for each optimized PCM in `results/`, except RM(8,4). They use the decoder
+settings of the paper. The [reference records](logs/README.md) include CSV results and run metadata;
+use the recorded thread count for exact replay. See the [top-level README](../README.md) for the results.
 
 ### Settings
 

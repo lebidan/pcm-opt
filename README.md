@@ -9,12 +9,12 @@ remarkably well:
 
 > Y. Shen, Z. Li, Y. Ren, E. Boutillon, A. Balatsoukas-Stimming, C. Zhang, X. You, A. Burg,
 > "Toward Universal Belief Propagation Decoding for Short Binary Block Codes,"
-> *IEEE Journal on Selected Areas in Communications*, vol. 43, no. 4, pp. 1135–1149, April 2025.
+> *IEEE Journal on Selected Areas in Communications*, vol. 43, no. 4, pp. 1135–1152, April 2025.
 > [IEEE Xplore](https://ieeexplore.ieee.org/document/10887536)
 
 I like this approach because it can turn a dense PCM into a sparser one suited to BP decoding.
 As with short LDPC codes, the main challenge then becomes bringing BP closer to maximum-likelihood
-decoding (MLD) with as little computational overhead as possible.
+decoding (MLD) with as little computational overhead as possible, which is another story.
 
 Unfortunately, and to the best of my knowledge, neither the optimized PCMs of the paper nor the code
 to construct them have been made publicly available. This repository is my attempt to fill this
@@ -27,8 +27,9 @@ authors' code, so any error or misinterpretation of the algorithms is mine.
 
 **Current status (November 2026):** most results are reproduced, though the constructed PCMs do not
 always have the exact form reported in the paper. The best PCMs provided here generally give FER
-close to or better than the published curves, with a remaining gap for the (128,72) polar code
-(see below).
+close to or better than the published curves, with a remaining gap for the (128,72) polar code.
+[Have a look at this plot](media/reproduction_results.png) to assess how the optimized PCMs
+generated here compare to the paper's results.
 
 **Lessons learned:** I found that choosing the parity checks in the starting PCM deserves as much
 attention as optimizing the resulting graph through the PCM-I or PCM-II construction. As demonstrated
@@ -137,10 +138,12 @@ The configs in `sim/config/` use normalized min-sum (α = 0.7) with flooding, as
 setting can be overridden on the command line (e.g. `decoder.max_iter=50`), and `use_base_pcm=true`
 decodes with the original PCM instead, for comparison. Results are written to `sim/logs/`. See
 [`sim/README.md`](sim/README.md) for the available decoders.
+[Simulation records and replay settings](sim/logs/README.md) are supplied for every
+optimized PCM except RM(8,4). Use the thread counts in the commands below to repeat those runs.
 
 ### Files
 
-Codes are stored in `codes/<code>.mat` (`H`, `G`, `n`, `k`, `dmin`, and `Ginv` for non-systematic
+Codes are stored in `codes/<code>.mat` (`H`, `G`, `n`, `k`, optional `dmin`, and `Ginv` for non-systematic
 encoders). An optimized PCM is saved in the same format, with the optimized PCM in `H`, the original
 one in `H_base`, the indices of the auxiliary VNs in `puncturing_set`, and its `eta_min`. The
 optimized PCMs of the next section are in `results/`.
@@ -168,7 +171,7 @@ Result: `results/rm.32.16.pcm2.mat`.
 
 ```
 julia --project scripts/pcm_ii.jl codes/rm.32.16 M_a=48 seed_p=6
-(cd sim && julia --project=. -t auto scripts/simulate.jl config/rm.32.16.pcm2.yaml)
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/rm.32.16.pcm2.yaml)
 ```
 
 PCM-I. Algorithm 1 with the default tie-break gives a 32×48 PCM with 16 auxiliary VNs, 122 edges and
@@ -186,7 +189,7 @@ Result: `results/rm.32.16.pcm1.mat`.
 
 ```
 julia --project scripts/pcm_i.jl codes/rm.32.16 seed=11474
-(cd sim && julia --project=. -t auto scripts/simulate.jl config/rm.32.16.pcm1.yaml)
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/rm.32.16.pcm1.yaml)
 ```
 
 | PCM-I | FER at 5 dB | 6 dB | 7 dB |
@@ -220,7 +223,7 @@ Reproduces the PCM-II given in the text: search space of 189 codewords of weight
 
 ```
 julia --project scripts/pcm_ii.jl codes/bch.63.45 M_a=70 seed_p=1
-(cd sim && julia --project=. -t auto scripts/simulate.jl config/bch.63.45.pcm2.yaml)
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/bch.63.45.pcm2.yaml)
 ```
 
 Larger values of `M_a` give the same PCM: Algorithm 3 stops by itself at 54 rows.
@@ -232,7 +235,7 @@ on 48 threads). Result: `results/ebch.64.24.pcm2.mat`.
 
 ```
 julia --project -t auto scripts/pcm_ii.jl codes/ebch.64.24 M_a=255 seed_p=1
-(cd sim && julia --project=. -t auto scripts/simulate.jl config/ebch.64.24.pcm2.yaml)
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/ebch.64.24.pcm2.yaml)
 ```
 
 The search space contains 2520 codewords of weight 8, not 2560 as written in the paper. I checked
@@ -245,15 +248,15 @@ Result: `results/ebch.64.24.pcm2.eta52.mat`.
 
 ```
 julia --project -t auto scripts/pcm_ii.jl codes/ebch.64.24 M_a=345 seed_p=1 out=results/ebch.64.24.pcm2.eta52.mat
-(cd sim && julia --project=. -t auto scripts/simulate.jl config/ebch.64.24.pcm2.eta52.yaml)
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/ebch.64.24.pcm2.eta52.yaml)
 ```
 
 It gains about 0.1 dB over the paper's PCM, for 24% more edges (NMS, 20 iterations):
 
 | PCM-II | η̄_min | FER at 2 dB | 3 dB | 4 dB | 5 dB |
 |---|---|---|---|---|---|
-| 272×81 (paper's PCM) | 44 | 5.60e-2 | 8.28e-3 | 6.04e-4 | 1.19e-5 |
-| 336×85 | 52 | 4.88e-2 | 6.77e-3 | 4.00e-4 | 8.68e-6 |
+| 272×81 (reproduction) | 44 | 5.60e-2 | 8.47e-3 | 6.05e-4 | 1.06e-5 |
+| 336×85 | 52 | 4.83e-2 | 6.82e-3 | 4.30e-4 | 8.15e-6 |
 
 The row count at which η̄_min stops increasing depends on `seed_p`, so other seeds with a large `M_a`
 may do better.
@@ -267,7 +270,7 @@ number of auxiliary VNs. Result: `results/rm.128.64.pcm2.mat`.
 
 ```
 julia --project -t auto scripts/pcm_ii.jl codes/rm.128.64 M_a=150 seed_p=6
-(cd sim && julia --project=. -t auto scripts/simulate.jl config/rm.128.64.pcm2.yaml)
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/rm.128.64.pcm2.yaml)
 ```
 
 However, GPT-6.1-Sol found an optimized PCM with *fewer* auxiliary VNs and *better FER* than the one reported in the paper by
@@ -277,6 +280,7 @@ Passing it to Algorithm 1 gives a 144×137 PCM with 9 auxiliary VNs, 1296 edges 
 
 ```
 julia --project scripts/pcm_i.jl codes/rm.128.64.geom
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/rm.128.64.geom.pcm1.yaml)
 ```
 
 See the [construction details and recipe](docs/rm_128_64.md).
@@ -287,8 +291,8 @@ matrix slightly outperforming the paper's PCM-II:
 | PCM | FER at 3 dB | 4 dB |
 |---|---|---|
 | 141×141 (paper, Fig. 9) | ≈ 1.2e-1 | ≈ 8e-3 |
-| 147×161 | 1.29e-1 | 1.03e-2 |
-| 144×137 (geometric) | 1.12e-1 | 7.65e-3 |
+| 147×161 | 1.31e-1 | 1.03e-2 |
+| 144×137 (geometric) | 1.13e-1 | 7.54e-3 |
 
 ### Polar codes: partially reproduced
 
@@ -333,6 +337,13 @@ ACE-based selection rule.
 Results: [20-bit candidate](results/polar.128.20.crc24c.pcm2.mat),
 [40-bit candidate](results/polar.128.40.crc24c.pcm2.mat) and
 [72-bit candidate](results/polar.128.72.crc24c.pcm2.mat).
+
+```
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/polar.128.20.crc24c.pcm2.yaml)
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/polar.128.40.crc24c.pcm2.yaml)
+(cd sim && julia --project=. -t 16 scripts/simulate.jl config/polar.128.72.crc24c.pcm2.yaml)
+```
+
 The first two have FER close to the paper's; the third still has about three times the paper's
 FER at 4 dB. These comparisons use an inferred energy normalization that includes CRC bits.
 The exact published PCMs have not been reproduced. See the [construction notes](docs/polar_codes.md)

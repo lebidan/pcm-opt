@@ -121,17 +121,14 @@ end
 ```
 
 This verifies the final factorization from the saved redundant input. It does
-not rerun Algorithms 2 and 3. The complete search-space generation and PRG
-exploration remain on the local research branches; the selected inputs are
-the portable record needed to replay these particular final graphs.
+not rerun Algorithms 2 and 3. The selected inputs preserve the exact checks
+and row order needed to replay these particular final graphs.
 
 ## FER and energy normalization
 
-The measurements below are from the construction investigation. The comparisons
-use random codewords, flooding NMS with factor 0.7 and at
-most 200 iterations. Auxiliary VNs have zero channel LLR. The 40- and 72-bit
-curves use LLR saturation at 128. The 20-bit curve predates saturation;
-a later saturated control was statistically consistent with it.
+The measurements below are from the supplied reference simulations. They use
+random codewords, flooding NMS with factor 0.7, at most 200 iterations and LLR
+saturation at 128. Auxiliary VNs have zero channel LLR.
 
 Agreement with Fig. 8 uses an inferred Eb/N0 convention counting payload plus
 CRC bits: the normalization rates are 44/128, 64/128 and 96/128. The actual
@@ -144,18 +141,22 @@ shifted, payload-normalized values.
 
 | Payload | Eb/N0 (CRC-inclusive), dB | Frames | Errors | Candidate FER | Paper FER, approximate |
 |---|---:|---:|---:|---:|---:|
-| 20 | 1 | 100000 | 317 | 0.003170 | ≈0.003 |
-| 20 | 2 | 1692000 | 150 | 0.00008865 | ≈0.0001 |
-| 40 | 2 | 200000 | 2490 | 0.01245 | ≈0.01195 |
-| 40 | 2.5 | 200000 | 453 | 0.002265 | ≈0.002761 |
-| 40 | 3 | 534000 | 200 | 0.0003745 | ≈0.0005110 |
-| 40 | 3.5 | 5738000 | 200 | 0.00003486 | ≈0.00005300 |
-| 72 | 3 | 200000 | 4250 | 0.02125 | ≈0.01379 |
-| 72 | 3.5 | 200000 | 934 | 0.004670 | ≈0.002088 |
-| 72 | 4 | 284000 | 200 | 0.0007042 | ≈0.0002177 |
+| 20 | 1 | 200000 | 635 | 0.003175 | ≈0.003 |
+| 20 | 2 | 564000 | 50 | 0.00008865 | ≈0.0001 |
+| 40 | 2 | 200000 | 2436 | 0.01218 | ≈0.01195 |
+| 40 | 2.5 | 200000 | 478 | 0.002390 | ≈0.002761 |
+| 40 | 3 | 200000 | 81 | 0.0004050 | ≈0.0005110 |
+| 40 | 3.5 | 1528000 | 50 | 0.00003272 | ≈0.00005300 |
+| 72 | 3 | 200000 | 4245 | 0.021225 | ≈0.01379 |
+| 72 | 3.5 | 200000 | 932 | 0.004660 | ≈0.002088 |
+| 72 | 4 | 200000 | 131 | 0.0006550 | ≈0.0002177 |
 
 The 20-bit curve used seed 8731; the other curves used seed 984731. All used
-eight threads and batches of 250 frames per thread. Paper values are readings
+16 threads and batches of 250 frames per thread. Paper values are readings
 from Fig. 8, not the authors' raw samples; the 20-bit values are coarser visual
 estimates. The exact matrices and selection trajectory remain unreproduced,
 even where FER follows the paper closely.
+
+The complete curves and run metadata are supplied in the
+[simulation records](../sim/logs/README.md).
+The [README](../README.md#polar-codes-partially-reproduced) gives their replay commands.
