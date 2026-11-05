@@ -57,6 +57,12 @@ end
         @test base.n == code.n && base.k == code.k
     end
 
+    @testset "TannerGraph rejects checks of degree < 2" begin
+        @test_throws ArgumentError TannerGraph(Bool[1 1 0; 0 0 1])
+        @test_throws ArgumentError TannerGraph(Bool[1 1 0; 0 0 0])
+        @test TannerGraph(Bool[1 1 0; 0 1 1]).n_cn == 2
+    end
+
     @testset "plain code file has no H_base → n_avn=0" begin
         code = load_code(repofile("codes/rm.32.16.mat"))
         @test code.n_avn == 0

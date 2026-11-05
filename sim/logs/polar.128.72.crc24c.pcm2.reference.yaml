@@ -5,8 +5,8 @@ code_file: ../results/polar.128.72.crc24c.pcm2.mat
 code_name: 5G NR polar CRC24C
 n: 128
 k: 72
-n_avn: 337
-m: 482
+n_avn: 330
+m: 472
 rate: 0.5625
 dmin: null
 use_base_pcm: false
@@ -28,4 +28,4 @@ batch_size: 250
 checkpoint_seconds: 5.0
 nthreads: 16
 julia_version: "1.12.6"
-started: 2026-11-03-18-27-02
+started: 2026-11-05-08-22-29

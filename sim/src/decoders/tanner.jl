@@ -40,6 +40,9 @@ end
 function TannerGraph(H::AbstractMatrix{Bool})
     n_cn, n_vn = size(H)
     dv, dc = vec(count(H; dims = 1)), vec(count(H; dims = 2))
+    # The check-node update computes extrinsic messages from the other edges, so it needs degree ≥ 2.
+    c = findfirst(<(2), dc)
+    c === nothing || throw(ArgumentError("check $c has degree $(dc[c]); BP needs every check degree ≥ 2"))
     vn_ptr, cn_ptr = cumsum([1; dv]), cumsum([1; dc])
     E = vn_ptr[end] - 1
     cn_edge, cn_vn = Vector{Int32}(undef, E), Vector{Int32}(undef, E)

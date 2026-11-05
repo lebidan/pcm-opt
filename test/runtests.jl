@@ -72,6 +72,15 @@ const RM32_PCM2 = extract_pcm(RM32_HS, RM32.n, RM32.k; M_a = 48, seed = 6)
         @test (m.rows, m.cols, m.edges, m.sixcyc, m.eta_min) == (32, 48, 121, 24, 3)
     end
 
+    @testset "Algorithm 1 cleanups repeat until none applies" begin
+        # N = 3 real VNs, AVNs 4–6. Merging the degree-2 CN {4,5} turns {4,5,6} into the degree-1
+        # CN {6}, whose AVN must then go too, leaving {1,2} and {1,3,4}. A single pass of each
+        # cleanup (the old behaviour) left that degree-1 CN in place.
+        A = from_bool(Bool[0 0 0 1 1 0; 0 0 0 1 1 1; 1 1 0 0 0 1; 1 0 1 1 0 0])
+        PCMOpt.cleanup!(A, 3)
+        @test PCMOpt.to_bool(A) == Bool[1 1 0 0; 1 0 1 1]
+    end
+
     @testset "Algorithm 2 (search space)" begin
         is_dual(G, r, k, n) = all(a -> !reduce(⊻, (G[a, j] & r[j] for j in 1:n)), 1:k)
         # Complete low-weight dual-codeword sets (deterministic given enough trials); sizes and

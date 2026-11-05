@@ -18,10 +18,10 @@ so `dmin` is omitted.
 |---|---|---|---:|---:|---:|
 | 20 | `polar.128.20.crc24c.pcm2.mat` | 323×215 | 1225 | 87 | 8 |
 | 40 | `polar.128.40.crc24c.pcm2.mat` | 329×283 | 1538 | 155 | 5 |
-| 72 | `polar.128.72.crc24c.pcm2.mat` | 482×465 | 2232 | 337 | 3 |
+| 72 | `polar.128.72.crc24c.pcm2.mat` | 472×458 | 2197 | 330 | 3 |
 
 All three have girth 6. Their auxiliary-related six-cycle counts are 179,
-1313 and 1553, respectively, versus 193, 1105 and 1429 reported for the paper's
+1313 and 1548, respectively, versus 193, 1105 and 1429 reported for the paper's
 PCMs. The last paper count should be read alongside its different matrix size.
 
 Each optimized file has a companion ending in `.input.mat` instead of `.mat`.
@@ -47,7 +47,7 @@ Algorithm 1, without Algorithm 4's rapid bypass.
 The first-row indices refer to the stored search-space ordering, not coordinate
 indices. The 40-bit initial check has support `{7,17,39,49,71,81,103,113}`
 in one-based coordinates. Both tie policies use stable row deletion and the
-existing degree-one/two cleanup rules.
+degree-one/two cleanup rules, repeated until neither applies.
 
 For payload 20, exhaustive enumeration certifies 18 weight-4 and 248 weight-5
 dual words, together spanning rank 108. For payload 40, it certifies 310
@@ -147,9 +147,9 @@ shifted, payload-normalized values.
 | 40 | 2.5 | 200000 | 478 | 0.002390 | ≈0.002761 |
 | 40 | 3 | 200000 | 81 | 0.0004050 | ≈0.0005110 |
 | 40 | 3.5 | 1528000 | 50 | 0.00003272 | ≈0.00005300 |
-| 72 | 3 | 200000 | 4245 | 0.021225 | ≈0.01379 |
-| 72 | 3.5 | 200000 | 932 | 0.004660 | ≈0.002088 |
-| 72 | 4 | 200000 | 131 | 0.0006550 | ≈0.0002177 |
+| 72 | 3 | 200000 | 4140 | 0.020700 | ≈0.01379 |
+| 72 | 3.5 | 200000 | 956 | 0.004780 | ≈0.002088 |
+| 72 | 4 | 200000 | 141 | 0.0007050 | ≈0.0002177 |
 
 The 20-bit curve used seed 8731; the other curves used seed 984731. All used
 16 threads and batches of 250 frames per thread. Paper values are readings

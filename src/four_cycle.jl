@@ -10,7 +10,8 @@
 # Cleanups (Alg.1 lines 17-23): a degree-1 CN on an AVN forces that AVN to 0 — drop the AVN column
 # and the CN. An AVN-related degree-2 CN makes its two VNs equal — merge them (keeping a real VN
 # when present), dropping the AVN column and the now-trivial CN. Both shrink the matrix and remove
-# the un-informative degree-1/2 CNs that seed small trapping sets.
+# the un-informative degree-1/2 CNs that seed small trapping sets. They are repeated until neither
+# applies, so the result has no degree-1 CN (BP decoders cannot process one).
 #
 # The original N columns are never deleted or moved; AVN columns are appended at the end and only
 # AVN columns are deleted, so "column j is an AVN" ⟺ j > N throughout.
@@ -94,10 +95,19 @@ function apply_block!(A::GF2Matrix, Sv::BitVector, Sc::Vector{Int}, N::Int)
     @inbounds for i in Sc
         xorrow!(A, i, mrow)
     end
-    cleanup_degree1!(A, N)
-    cleanup_degree2!(A, N)
-    drop_zero_rows!(A)          # merge identical rows (a duplicate collapses to an all-zero row)
-    A
+    cleanup!(A, N)
+end
+
+# Run both cleanups until neither applies. Each can create work for the other: a degree-2 merge can
+# leave a degree-1 CN on an AVN, and dropping that AVN can leave a new degree-2 CN.
+function cleanup!(A::GF2Matrix, N::Int)
+    while true
+        sz = (nrows(A), ncols(A))
+        cleanup_degree1!(A, N)
+        cleanup_degree2!(A, N)
+        drop_zero_rows!(A)      # merge identical rows (a duplicate collapses to an all-zero row)
+        (nrows(A), ncols(A)) == sz && return A
+    end
 end
 
 # All maximal-δ blocks (δ = 4-cycles removed = C(|S_v|,2)·C(|S_c|,2)), for randomized tie-breaking.
