@@ -2,7 +2,7 @@
 # py3gpp 0.6.0, nrCRCEncode(mask=0) + nrPolarEncode(E=128,nmax=7,iil=true).
 # Row i is payload bit i set; hex packs codeword bits 0..127 MSB first.
 using Test, MAT, LinearAlgebra
-include(joinpath(@__DIR__, "..", "src", "build_polar_codes.jl"))
+include(joinpath(@__DIR__, "..", "scripts", "build_polar_codes.jl"))
 
 const BASIS_HEX = [
     "0312746503ed749afced8b9a03ed749a",

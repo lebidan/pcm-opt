@@ -1,6 +1,6 @@
 # Report the dominant trapping-set distribution 𝒯(a,b) of a PCM.
 #
-#   julia --project scripts/trapping.jl <file.mat> [a_max=4]
+#   julia --project scripts/trapping_report.jl <file.mat> [a_max=4]
 #
 # <file.mat> may be a produced PCM or a code file; both are read from their `H` variable.
 # 𝒯(a,b) = number of size-a variable-node subsets whose induced subgraph is a *dominant* trapping set

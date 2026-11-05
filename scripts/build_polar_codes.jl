@@ -1,5 +1,5 @@
 # Build the three CRC24C polar mother codes used in the reproduction.
-# Run from the repository root: julia --project src/build_polar_codes.jl [payload=20|40|72]
+# Run from the repository root: julia --project scripts/build_polar_codes.jl [payload=20|40|72]
 # With no argument, write all three files in codes/. No rate matching or CRC mask.
 # Minimum distances are not certified, so the dmin field is omitted.
 # Tables: 3GPP TS 38.212 V17.7.0, Tables 5.3.1.1-1 and 5.3.1.2-1.
@@ -154,7 +154,7 @@ function main()
     elseif length(ARGS) == 1 && ARGS[1] in ("payload=20", "payload=40", "payload=72")
         (parse(Int, split(ARGS[1], "=")[2]),)
     else
-        error("usage: julia --project src/build_polar_codes.jl [payload=20|40|72]")
+        error("usage: julia --project scripts/build_polar_codes.jl [payload=20|40|72]")
     end
     for A in payloads
         G, H, Ginv, perm = build(; payload=A)

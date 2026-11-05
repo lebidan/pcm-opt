@@ -80,7 +80,7 @@ threads, and `julia -t auto` to use one thread per logical core of the machine. 
 this repository, the extracted PCMs do not depend on the number of threads.
 
 The three original CRC24C polar codes can be regenerated with
-`julia --project src/build_polar_codes.jl`. Add `payload=20`, `payload=40` or `payload=72`
+`julia --project scripts/build_polar_codes.jl`. Add `payload=20`, `payload=40` or `payload=72`
 to generate only one of them.
 
 **PCM-I (Algorithm 1 on the code's PCM):**
@@ -122,7 +122,7 @@ Calculates the trapping-set distribution 𝒯(a,b) up to `a = a_max` for the spe
 smallest trapping set.
 
 ```
-julia --project scripts/trapping.jl <file.mat> [a_max=4]
+julia --project scripts/trapping_report.jl <file.mat> [a_max=4]
 ```
 
 **PCM performance under BP over the BI-AWGN channel:**
@@ -201,9 +201,9 @@ julia --project scripts/pcm_i.jl codes/rm.32.16 seed=11474
 Trapping sets. The 𝒯(a,b) distributions of Table I are obtained with:
 
 ```
-julia --project scripts/trapping.jl results/rm.32.16.pcm2.mat                  # PCM-II
-julia --project scripts/trapping.jl results/rm.32.16.pcm1.seed1815.mat         # PCM-I (seed 1815)
-julia --project scripts/trapping.jl codes/rm.32.16.mat                         # original PCM
+julia --project scripts/trapping_report.jl results/rm.32.16.pcm2.mat                  # PCM-II
+julia --project scripts/trapping_report.jl results/rm.32.16.pcm1.seed1815.mat         # PCM-I (seed 1815)
+julia --project scripts/trapping_report.jl codes/rm.32.16.mat                         # original PCM
 ```
 
 The script counts, by exhaustive enumeration, every trapping set that meets the definition of
@@ -300,7 +300,7 @@ The original PCMs for the three length-128 polar codes, using the 5G NR downlink
 construction, can be regenerated with:
 
 ```
-julia --project src/build_polar_codes.jl
+julia --project scripts/build_polar_codes.jl
 ```
 
 The files are saved as `codes/polar.128.<k>.crc24c.mat`. Add `payload=20`, `payload=40` or
