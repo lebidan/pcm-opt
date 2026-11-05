@@ -1,0 +1,12 @@
+# Fig. 8 convention: 1 to 4 dB with CRC-inclusive Eb/N0.
+# Payload-normalized Eb/N0 below adds 10*log10((72+24)/72) = 1.249387366083 dB.
+code_file: ../results/polar.128.72.crc24c.sspcm.mat
+decoder: { algorithm: NMS, schedule: flooding, max_iter: 200, norm_factor: 0.5, llr_clip: 128 }
+all_zero: false
+ebn0_min: 2.249387366082999
+ebn0_max: 5.249387366082999
+ebn0_step: 0.5
+min_cw: 200000
+min_cw_err: 50
+seed: 984731
+batch_size: 250

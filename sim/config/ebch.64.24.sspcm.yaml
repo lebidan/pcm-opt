@@ -1,0 +1,10 @@
+code_file: ../results/ebch.64.24.sspcm.mat
+decoder: { algorithm: NMS, schedule: flooding, max_iter: 20, norm_factor: 0.35, llr_clip: 128 }
+all_zero: false
+ebn0_min: 0.0
+ebn0_max: 5.5
+ebn0_step: 0.5
+min_cw: 200000
+min_cw_err: 50
+seed: 8731
+batch_size: 250

@@ -11,6 +11,7 @@ include("io.jl")
 include("four_cycle.jl")
 include("search_space.jl")
 include("prg.jl")
+include("sspcm.jl")
 
 export LinearCode, load_code,
     GF2Matrix, nrows, ncols, rowweight, rank_gf2, from_bool,
@@ -19,6 +20,7 @@ export LinearCode, load_code,
     save_optpcm, load_optpcm,
     remove_4cycles, remove_4cycles_rand, rapid_bypass,
     gen_search_space,
-    extract_pcm
+    extract_pcm,
+    sspcm, represents_code
 
 end

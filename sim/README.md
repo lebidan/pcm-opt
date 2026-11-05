@@ -37,6 +37,14 @@ julia --project=. -t auto scripts/simulate.jl config/rm.32.16.pcm2.yaml use_base
 julia --project=. -t auto scripts/simulate.jl code_file=../codes/bch.63.45.mat ebn0_max=6 decoder.algorithm=MS
 ```
 
+To compare several PCMs, or several values of α, by a short simulation, `scripts/fer_screen.jl`
+runs `simulate.jl` on each `.mat` file given (or each one in a directory), once per value of α, and
+prints one line of FER per run:
+
+```
+julia --project=. -t auto scripts/fer_screen.jl config/rm.32.16.sspcm.yaml ../sweep/rm.32.16 alpha=0.5,0.7 min_cw=50000
+```
+
 `sim/config/` contains one config for each optimized PCM in `results/`, except RM(8,4). They use the decoder
 settings of the paper. The [reference records](logs/README.md) include CSV results and run metadata;
 use the recorded thread count for exact replay. See the [top-level README](../README.md) for the results.

@@ -4,7 +4,8 @@ The original length-128 CRC24C polar codes match the standard PCM dimensions
 and edge counts in Fig. 8 of the paper. The optimized matrices reproduce only
 part of the reported results: the 20- and 40-bit candidates follow the plotted
 FER closely, while the 72-bit candidate remains worse. None is the exact
-published PCM-II.
+published PCM-II. The ssPCMs of the [README](../README.md) now beat the paper
+on all three codes.
 
 ## Supplied matrices
 
@@ -159,4 +160,5 @@ even where FER follows the paper closely.
 
 The complete curves and run metadata are supplied in the
 [simulation records](../sim/logs/README.md).
-The [README](../README.md#polar-codes-partially-reproduced) gives their replay commands.
+The [reproduction notes](jsac_reproduction.md#polar-codes-partially-reproduced) give their replay
+commands.

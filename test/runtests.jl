@@ -206,6 +206,27 @@ const RM32_PCM2 = extract_pcm(RM32_HS, RM32.n, RM32.k; M_a = 48, seed = 6)
         rm(tmp; force = true)
     end
 
+    @testset "ssPCM" begin
+        # RM(32,16): the 9 blocks of a full partial spread keep Γmax = 1; every matrix of the
+        # sequence defines exactly the code.
+        seq = []
+        sspcm(RM32_HS, RM32.n, RM32.k; max_edges = 400,
+              onstep = (A, Γ, B) -> push!(seq, (A, Γ, B)))
+        @test all(represents_code(A, RM32.G, RM32.n, RM32.k) for (A, _, _) in seq)
+        A9 = only(A for (A, Γ, B) in seq if B == 9)
+        @test (nrows(A9), ncols(A9), num_edges(A9), count_4cycles(A9)) == (72, 41, 360, 0)
+        # BCH(63,45): ssPCM-I and the 63×72 PCM-II of the ISIT 2025 paper.
+        c = load_code(joinpath(CODES, "bch.63.45"))
+        sizes = Dict{Int,Tuple{Int,Int,Int}}()
+        sspcm(gen_search_space(from_bool(c.H); T_max = 8000, seed = 1), c.n, c.k; max_edges = 567,
+              onstep = (A, Γ, B) -> (sizes[B] = (nrows(A), ncols(A), num_edges(A))))
+        @test sizes[4] == (28, 67, 252) && sizes[9] == (63, 72, 567)
+        # A wrong matrix is caught: one flipped coded bit.
+        bad = copy(A9)
+        bad.rows[1][findfirst(!, bad.rows[1])] = true
+        @test !represents_code(bad, RM32.G, RM32.n, RM32.k)
+    end
+
     @testset "guards" begin
         c, H = loadA("rm.32.16")
         # eta_min rejects matrices that still contain 4-cycles (the standard PCM).
